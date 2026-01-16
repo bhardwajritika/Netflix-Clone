@@ -134,7 +134,66 @@ class APICaller {
         task.resume()
     }
     
+    
+    func getDiscoverMovies(completion: @escaping (Result<[Title], Error>) -> Void) {
+        guard let url = URL(string: "\(Constants.baseURL)/3/discover/movie?api_key=\(Constants.API_KEY)&language=en-US")
+        else { return }
+                
+        print(url)
+                
+        let task = URLSession.shared.dataTask(with: URLRequest(url: url)) {
+                    data, _, error in
+                    guard let data = data, error == nil else {
+                        return
+                    }
+                    
+                    do {
+                        let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
+                        completion(.success(results.results))
+                    } catch {
+                        completion(.failure(APIError.failedTogetData))
+                    }
+                }
+        
+        task.resume()
+    }
+    
+    
+    func getSearchMovies(with query: String, completion: @escaping (Result<[Title], Error>) -> Void) {
+        guard let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+            return
+        }
+        
+        guard let url = URL(string: "\(Constants.baseURL)/3/search/movie?api_key=\(Constants.API_KEY)&query=\(query)")
+        else { return }
+        
+        print(url)
+        
+        let task = URLSession.shared.dataTask(with: URLRequest(url: url)) {
+            data, _, error in
+            guard let data = data, error == nil else {
+                return
+            }
+            
+            do {
+                let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
+                completion(.success(results.results))
+            } catch {
+                completion(.failure(APIError.failedTogetData))
+            }
+        }
+        
+        task.resume()
+    }
+    
+    
+    
 }
+
+
+// https://api.themoviedb.org/3/search/movie?api_key=62848b406a7afec16842b362eb3188c4&query=avengers&page=1&language=en-US
+
+// https://api.themoviedb.org/3/discover/movie?api_key=62848b406a7afec16842b362eb3188c4&page=1&language=en-US
 
 
 
